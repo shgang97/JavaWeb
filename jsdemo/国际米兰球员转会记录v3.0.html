@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>国际米兰球员转会记录</title>
+
+        <style>
+            table {
+                border: 1px solid;
+                margin: auto;
+                width: 500px;
+            }
+
+            td, th {
+                text-align: center;
+                border: 1px;
+            }
+
+            div {
+                text-align: center;
+                margin: 50px;
+            }
+
+            .out {
+                background-color: white;
+            }
+
+            .over {
+                background-color: darkblue;
+                font-size: larger;
+            }
+        </style>
+
+        <script>
+
+            /*
+            分析：
+            1.全选：
+                * 获取所有的checkbox
+                * 遍历cb，设置每一个cb的状态为选中  checked
+
+            */
+            //在页面加载完成后绑定事件
+            window.onload = function () {
+
+                //1.给全选按钮绑定单击事件
+                document.getElementById("selectAll").onclick = function () {
+                    //全选
+                    //1.1获取所有的checkbox
+                    var cbs = document.getElementsByName("cb");
+                    //1.2遍历
+                    for (var i = 0; i < cbs.length; i++) {
+                        //2.3设置每一个cb的状态为选中
+                        cbs[i].checked = true;
+                    }
+                }
+
+                //2.给全不选按钮绑定单击事件
+                document.getElementById("unSelectAll").onclick = function () {
+                    var cbs = document.getElementsByName("cb");
+                    for (var i = 0; i < cbs.length; i++) {
+                        cbs[i].checked = false;
+                    }
+                }
+
+                //3.给反选按钮绑定单击事件
+                document.getElementById("selectRev").onclick = function () {
+                    var allSelected = true;
+                    var cbs = document.getElementsByName("cb");
+                    for (var i = 1; i < cbs.length; i++) {
+                        cbs[i].checked = !cbs[i].checked;
+                        allSelected = allSelected && cbs[i].checked;
+                    }
+                    cbs[0].checked = cbs.length > 1 ? allSelected : !cbs[0].checked;
+                }
+
+                //4.给第一个输入框绑定单击事件
+                document.getElementById("firstCb").onclick = function () {
+                    var cbs = document.getElementsByName("cb");
+                    for (var i = 0; i < cbs.length; i++) {
+                        cbs[i].checked = this.checked;
+                    }
+                }
+
+                //5.给所有tr绑定鼠标移到元素之上和移出元素事件
+                //5.1获取所有的tr标签
+                var trs = document.getElementsByTagName("tr");
+                //5.2遍历
+                for (var i = 0; i < trs.length; i++) {
+                    //为每个tr标签绑定移到元素之上事件
+                    trs[i].onmouseover = function () {
+                        this.className = "over";
+                    }
+
+                    //为每个tr标签绑定移出元素事件
+                    trs[i].onmouseout = function () {
+                        this.className = "out";
+                    }
+                }
+
+            }
+        </script>
+
+    </head>
+    <body>
+        <div>
+            <input type="text" id="number" placeholder="请输入球衣号码">
+            <input type="text" id="name" placeholder="请输入姓名">
+            <input type="text" id="position" placeholder="请输入位置">
+            <input type="button" id="btn_add" value="转入">
+        </div>
+
+        <table>
+            <caption>球员信息表</caption>
+            <tr>
+                <th><input type="checkbox" id="firstCb" name="cb"></th>
+                <th>球衣号码</th>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>操作</th>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" name="cb"></td>
+                <td>9</td>
+                <td>卢卡库</td>
+                <td>前锋</td>
+                <td><a href="javascript:void(0);" onclick="delTr(this);">转出</a></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" name="cb"></td>
+                <td>23</td>
+                <td>巴雷拉</td>
+                <td>中场</td>
+                <td><a href="javascript:void(0);" onclick="delTr(this);">转出</a></td>
+            </tr>
+
+            <tr>
+                <td><input type="checkbox" name="cb"></td>
+                <td>2</td>
+                <td>阿什拉夫</td>
+                <td>后卫</td>
+                <td><a href="javascript:void(0);" onclick="delTr(this);">转出</a></td>
+            </tr>
+        </table>
+
+        <div>
+            <input type="button" id="selectAll" value="全选">
+            <input type="button" id="unSelectAll" value="全不选">
+            <input type="button" id="selectRev" value="反选">
+        </div>
+
+        <script>
+
+
+            //1. 获取按钮
+            document.getElementById("btn_add").onclick = function () {
+                //2.获取文本框的内容
+                var num = document.getElementById("number").value;
+                var name = document.getElementById("name").value;
+                var position = document.getElementById("position").value;
+
+                //3.获取table
+                var table = document.getElementsByTagName("table")[0];
+                //4.追加一行
+                table.innerHTML += "<td><input type=\"checkbox\" name=\"cb\"></td>" +
+                    "<td>" + num + "</td>\n" +
+                    "                <td>" + name + "</td>\n" +
+                    "                <td>" + position + "</td>\n" +
+                    "                <td><a href=\"javascript:void(0);\" onclick=\"delTr(this);\">转出</a></td>"
+            }
+
+            //定义转出方法
+            function delTr(obj) {
+                //标签的层级关系：table -> tr -> td -> a
+                //获取tr标签
+                var tr = obj.parentNode.parentNode;
+                //获取table标签
+                var table = tr.parentNode;
+                //通过table标签删除tr标签
+                table.removeChild(tr);
+            }
+        </script>
+
+
+    </body>
+</html>
