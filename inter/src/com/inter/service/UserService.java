@@ -1,7 +1,10 @@
 package com.inter.service;
 
+import com.inter.domaim.PageBean;
 import com.inter.domaim.Player;
 import com.inter.domaim.User;
+
+import java.util.Map;
 
 /**
  * @author shgang
@@ -39,4 +42,12 @@ public interface UserService {
      * @param player
      */
     void updatePlayser(Player player);
+
+    /**
+     * 批量删除球员
+     * @param ids
+     */
+    void deleteSelectedPlayers(String[] ids);
+
+    PageBean<Player> findPlayerByPage(String currentPage, String rows, Map<String, String[]> map);
 }

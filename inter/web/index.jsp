@@ -27,7 +27,7 @@
     <div align="center">
       <a
               <%--使用EL表达式写虚拟目录--%>
-              href="${pageContext.request.contextPath}/playerListServlet" style="text-decoration:none;font-size:33px">查询所有球员信息
+              href="${pageContext.request.contextPath}/findPlayerByPageServlet" style="text-decoration:none;font-size:33px">查询所有球员信息
       </a>
     </div>
   </body>

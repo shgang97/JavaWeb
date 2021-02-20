@@ -6,7 +6,10 @@ import com.inter.util.JDBCUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author shgang
@@ -59,4 +62,64 @@ public class PlayerDaoImpl implements PlayerDao {
         //2.执行sql
         template.update(sql, player.getGender(), player.getAge(), player.getNumber(), player.getPosition(), player.getEmail(), player.getId());
     }
+
+    @Override
+    public void deleteSelected(String[] ids) {
+        for (String id : ids) {
+            delete(id);
+        }
+    }
+
+    @Override
+    public int findTotalCount(Map<String, String[]> map) {
+        //1.定义模版初始化sql
+        String initSql = "select count(*) from player where 1 = 1 ";
+        StringBuilder sql = new StringBuilder(initSql);
+        //2.遍历map
+        Set<String> keySet = map.keySet();
+        //定义参数集合
+        ArrayList<String> params = new ArrayList<>();
+        for (String key : keySet) {
+            //排除分页条件参数
+            if ("currentPage".equals(key) || "rows".equals(key)) continue;
+            //获取value
+            String value = map.get(key)[0];
+            //判断value是否有值
+            if (value != null && !"".equals(value)) {
+                sql.append(" and " + key + " like ? ");
+                params.add("%" + value + "%");
+            }
+        }
+
+        return template.queryForObject(sql.toString(), Integer.class, params.toArray());
+    }
+
+    @Override
+    public List<Player> findByPage(int start, int rows, Map<String, String[]> map) {
+        String initSql = "select * from player where 1 = 1 ";
+        StringBuilder sql = new StringBuilder(initSql);
+        //2.遍历map
+        Set<String> keySet = map.keySet();
+        //定义参数集合
+        ArrayList<Object> params = new ArrayList<>();
+        for (String key : keySet) {
+            //排除分页条件参数
+            if ("currentPage".equals(key) || "rows".equals(key)) continue;
+            //获取value
+            String value = map.get(key)[0];
+            //判断value是否有值
+            if (value != null && !"".equals(value)) {
+                sql.append(" and " + key + " like ? ");
+                params.add("%" + value + "%");
+            }
+        }
+        sql.append(" limit ?,? ");
+        params.add(start);
+        params.add(rows);
+        System.out.println(params);
+        System.out.println(sql.toString());
+        return template.query(sql.toString(), new BeanPropertyRowMapper<Player>(Player.class), params.toArray());
+    }
+
+
 }

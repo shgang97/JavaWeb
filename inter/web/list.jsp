@@ -34,6 +34,38 @@
                     location.href = "${pageContext.request.contextPath}/deletePlayerServlet?id=" + id;
                 }
             }
+
+            window.onload = function () {
+                //给删除选中按钮添加单击事件
+                document.getElementById("delSelected").onclick = function () {
+                    if (confirm("您确定要删除选中条目吗？")) {
+                        var flag = false;
+                        //判断是否有选中条目
+                        var cbs = document.getElementsByName("pid");
+                        for (var i = 0; i < cbs.length; i++) {
+                            if (cbs[i].checked) {
+                                flag = true;
+                                break;
+                            }
+                        }
+                        if (flag) {
+                            //表单提交
+                            document.getElementById("form").submit();
+                        }
+                    }
+                }
+
+                //1.获取第一个cb
+                document.getElementById("firstCb").onclick = function () {
+                    //2.获取下拉列表所有的cb
+                    var cbs = document.getElementsByName("pid");
+                    //3.遍历
+                    for (var i = 0; i < cbs.length; i++) {
+                        //4.设置这些cbs[i]的checked状态=firstCb.checked
+                        cbs[i].checked = this.checked;
+                    }
+                }
+            }
         </script>
     </head>
     <body>
@@ -43,19 +75,19 @@
             <!-- 添加筛选表单
             直接从https://v3.bootcss.com/css/#forms找到相关样式复制修改-->
             <div style="float: left;">
-                <form class="form-inline">
+                <form class="form-inline" action="${pageContext.request.contextPath}/findPlayerByPageServlet" method="post">
                     <div class="form-group">
                         <label for="inputname">姓名</label>
-                        <input type="text" class="form-control" id="inputname">
+                        <input type="text" value="${map.name[0]}" name="name" class="form-control" id="inputname">
                     </div>
 
                     <div class="form-group">
                         <label for="inputposition">位置</label>
-                        <input type="text" class="form-control" id="inputposition">
+                        <input type="text"value="${map.position[0]}"  name="position" class="form-control" id="inputposition">
                     </div>
                     <div class="form-group">
                         <label for="inputEmail">邮箱</label>
-                        <input type="email" class="form-control" id="inputEmail">
+                        <input type="email" value="${map.email[0]}" name="email" class="form-control" id="inputEmail">
                     </div>
                     <button type="submit" class="btn btn-default">查询</button>
                 </form>
@@ -63,41 +95,46 @@
 
             <div style="float: right;margin: 5px">
                 <a class="btn btn-primary" href="${pageContext.request.contextPath}/add.jsp">添加球员</a>
-                <a class="btn btn-primary" href="add.html">删除选中</a>
+                <a class="btn btn-primary" href="javascript:void(0);" id="delSelected">删除选中</a>
             </div>
-            <table border="1" class="table table-bordered table-hover">
-                <tr class="success">
-                    <th><input type="checkbox"></th>
-                    <th>编号</th>
-                    <th>姓名</th>
-                    <th>性别</th>
-                    <th>年龄</th>
-                    <th>号码</th>
-                    <th>位置</th>
-                    <th>邮箱</th>
-                    <th>操作</th>
-                </tr>
-
-                <c:forEach items="${players}" var="player" varStatus="s">
-                    <tr>
-                        <th><input type="checkbox"></th>
-                        <td>${s.count}</td>
-                        <td>${player.name}</td>
-                        <td>${player.gender}</td>
-                        <td>${player.age}</td>
-                        <td>${player.number}</td>
-                        <td>${player.position}</td>
-                        <td>${player.email}</td>
-                        <td>
-                            <a class="btn btn-default btn-sm" href="${pageContext.request.contextPath}/findPlayerServlet?id=${player.id}">修改</a>&nbsp;
-                                <%--定义方法，通过deleteUser(${player.id})访问servlet，并在方法中添加删除确认提示框--%>
-                            <a class="btn btn-default btn-sm" href="javascript:deletePlayer(${player.id});">删除</a></td>
+            <%--提交form表单，会自动提交id--%>
+            <form id="form" action="${pageContext.request.contextPath}/deleteSelectedServlet" method="post">
+                <table border="1" class="table table-bordered table-hover">
+                    <tr class="success">
+                        <th><input type="checkbox" id="firstCb"></th>
+                        <th>编号</th>
+                        <th>姓名</th>
+                        <th>性别</th>
+                        <th>年龄</th>
+                        <th>号码</th>
+                        <th>位置</th>
+                        <th>邮箱</th>
+                        <th>操作</th>
                     </tr>
-                </c:forEach>
-                <tr>
-                    <td colspan="12" align="center"></td>
-                </tr>
-            </table>
+
+                    <c:forEach items="${pageBean.list}" var="player" varStatus="s">
+                        <tr>
+                            <th><input type="checkbox" name="pid" value="${player.id}"></th>
+                            <td>${s.count}</td>
+                            <td>${player.name}</td>
+                            <td>${player.gender}</td>
+                            <td>${player.age}</td>
+                            <td>${player.number}</td>
+                            <td>${player.position}</td>
+                            <td>${player.email}</td>
+                            <td>
+                                <a class="btn btn-default btn-sm"
+                                   href="${pageContext.request.contextPath}/findPlayerServlet?id=${player.id}">修改</a>&nbsp;
+                                    <%--定义方法，通过deleteUser(${player.id})访问servlet，并在方法中添加删除确认提示框--%>
+                                <a class="btn btn-default btn-sm" href="javascript:deletePlayer(${player.id});">删除</a>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    <tr>
+                        <td colspan="12" align="center"></td>
+                    </tr>
+                </table>
+            </form>
 
             <div>
                 <!--添加分页工具条
@@ -105,23 +142,45 @@
                 -->
                 <nav aria-label="Page navigation">
                     <ul class="pagination">
+                        <c:if test="${pageBean.currentPage == 1}">
+                        <li class="disabled">
+
+                            </c:if>
+                            <c:if test="${pageBean.currentPage != 1}">
                         <li>
-                            <a href="#" aria-label="Previous">
+                            </c:if>
+
+                            <a href="${pageContext.request.contextPath}/findPlayerByPageServlet?currentPage=${1 < pageBean.currentPage ? pageBean.currentPage - 1 : 1}&rows=5&name=${map.name[0]}&position=${map.position[0]}&email=${map.email[0]}"
+                               aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
-                        <li><a href="#">1</a></li>
-                        <li><a href="#">2</a></li>
-                        <li><a href="#">3</a></li>
-                        <li><a href="#">4</a></li>
-                        <li><a href="#">5</a></li>
+                        <c:forEach begin="1" end="${pageBean.totalPage}" var="i">
+                            <c:if test="${pageBean.currentPage == i}">
+                                <li class="active">
+                                    <a href="${pageContext.request.contextPath}/findPlayerByPageServlet?currentPage=${i}&rows=5&name=${map.name[0]}&position=${map.position[0]}&email=${map.email[0]}">${i}</a>
+                                </li>
+                            </c:if>
+
+                            <c:if test="${pageBean.currentPage != i}">
+                                <li>
+                                    <a href="${pageContext.request.contextPath}/findPlayerByPageServlet?currentPage=${i}&rows=5&name=${map.name[0]}&position=${map.position[0]}&email=${map.email[0]}">${i}</a>
+                                </li>
+                            </c:if>
+                        </c:forEach>
+                        <c:if test="${pageBean.currentPage == pageBean.totalPage}">
+                        <li class="disabled">
+                            </c:if>
+                            <c:if test="${pageBean.currentPage != pageBean.totalPage}">
                         <li>
-                            <a href="#" aria-label="Next">
+                            </c:if>
+                            <a href="${pageContext.request.contextPath}/findPlayerByPageServlet?currentPage=${pageBean.currentPage < pageBean.totalPage ? pageBean.currentPage + 1 : pageBean.totalPage}&rows=5&name=${map.name[0]}&position=${map.position[0]}&email=${map.email[0]}"
+                               aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>
                         <span style="font-size: 25px;margin-left: 4px">
-                    共？条记录，共？页>
+                    共${pageBean.totalCount}条记录，共${pageBean.totalPage}页
                 </span>
                     </ul>
                 </nav>
